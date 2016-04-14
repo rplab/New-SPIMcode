@@ -1,0 +1,19 @@
+port = "COM4";
+import mmcorej.CharVector;
+
+//byte mesbyte = 127;
+CharVector message = new CharVector(); 
+//message.add(String(mesbyte));
+message.add('e'); 
+message.add('f');
+
+print(message.get(0));
+print(message.get(1));
+
+//Error.  Entries of CharVector wrong type?
+//mcc.writeToSerialPort(port,message);
+
+
+answer = mmc.readFromSerialPort(port);
+cap = answer.capacity();
+print(String.valueOf(cap))

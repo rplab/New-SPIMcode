@@ -1,0 +1,18 @@
+//setWL_510
+
+import mmcorej.CharVector;
+gui.clearMessageWindow();
+
+port = "COM4";
+CharVector message = new CharVector();
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u00fe';  // 1fe = 510.  Need to 
+char wl2 = '\u0001';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+
+mmc.writeToSerialPort(port,message);
+

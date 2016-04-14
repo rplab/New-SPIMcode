@@ -1,0 +1,17 @@
+
+import mmcorej.CharVector;
+gui.clearMessageWindow();
+
+port = "COM4";
+CharVector message = new CharVector();
+char cmd = '\u00ef';  //00ef = 239 = setLocal
+commandTerminator = "\r";
+
+message.add(cmd);
+
+
+str = "\u00ef";
+print(str);
+
+mmc.setSerialPortCommand(port,str,commandTerminator);
+mmc.writeToSerialPort(port,message);
