@@ -1,0 +1,19 @@
+import mmcorej.CharVector;
+gui.clearMessageWindow();
+
+CharVector message = new CharVector();
+char c = '\u00ef';
+byte b = 0x11;
+cs = c.toString();
+print(cs)
+
+//bs = b.toString();
+//String bs = new String(b,"UTF-8");
+//bc = bs.toCharArray();
+//bs = String(b);
+//print(bc)
+//message.add(bc);
+//print(message.get(0));
+
+
+
