@@ -1,0 +1,126 @@
+//sweepWLTakeIms_fullScript_test1.bsh
+
+//imports
+import mmcorej.CharVector;
+import java.lang.System;
+import org.micromanager.api.AcquisitionOptions;
+import org.micromanager.api.SequenceSettings;
+
+
+//initialize
+gui.closeAllAcquisitions();
+gui.clearMessageWindow();
+SequenceSettings settings = gui.getAcquisitionSettings();
+settings.intervalMs = 0;
+gui.setAcquisitionSettings(settings);
+
+//variables
+acqName = "testAcq";
+savedir = "C:/Users/High Throughput/Documents/Brandon";
+nFrames = 7;
+nChannels = 1;
+nSlices = 1;
+exposure = 30;
+port = "COM4";
+
+//more initialize
+gui.openAcquisition(acqName, savedir, nFrames, nChannels, nSlices);
+mmc.setExposure(exposure);
+
+//Create big CharVector of WLs.  Do this in a not stupid way later
+//
+CharVector message = new CharVector();
+
+//500
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u00f4';  // 1f4 = 500.  Need to 
+char wl2 = '\u0001';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+//510
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u00fe';  // 1f4 = 500.  Need to 
+char wl2 = '\u0001';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+//520
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u0008';  // 1f4 = 500.  Need to 
+char wl2 = '\u0002';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+
+//530
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u0012';  // 1f4 = 500.  Need to 
+char wl2 = '\u0002';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+//540
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u001c';  // 1f4 = 500.  Need to 
+char wl2 = '\u0002';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+//550
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u0026';  // 1f4 = 500.  Need to 
+char wl2 = '\u0002';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+//560
+char cmd = '\u00da';  //00da = 218 = setWL
+char wl1 = '\u0030';  // 1f4 = 500.  Need to 
+char wl2 = '\u0002';  // package in this way.
+
+message.add(cmd);
+message.add(wl1);
+message.add(wl2);
+
+
+//acquisition
+
+//counter for indexing big WL charvec
+int m = 0;
+for (int i=0; i<nFrames; i++) {
+
+	//individually write each byte
+	//first byte = 218
+	CharVector mtmp = new CharVector();
+	mtmp.add(message.get(m));
+	mmc.writeToSerialPort(port,mtmp);
+	m = m+1;
+
+	//wl byte 1
+	CharVector mtmp = new CharVector();
+	mtmp.add(message.get(m));
+	mmc.writeToSerialPort(port,mtmp);
+	m = m+1;
+
+	//wl byte 2
+	CharVector mtmp = new CharVector();
+	mtmp.add(message.get(m));
+	mmc.writeToSerialPort(port,mtmp);
+	m = m+1;
+	
+	gui.snapAndAddImage(acqName, i, 0, 0,0); 
+};
+
