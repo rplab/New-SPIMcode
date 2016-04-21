@@ -19,6 +19,99 @@ import sys
 
 import kbhit as kbhit
 
+def TestScanMultiFocus(focus, offset, exposure, slices, colors, timepoints, focusChannel="Dev1/ao0", scanChannel = "Dev1/ao1"):
+	"""Testing added functionality to scan program --- each xy region can have its own focus setting. This will be built off of the scan program in which the camera triggers the galvo.
+
+	Inputs:
+		focus, offset, exposure (as previously)
+		slices - number of z planes in a stack
+		colors - number of channels in a stack
+		timepoints - number of times each XY region will be scaned (in both colors)
+
+	"""
+	if (type(focus)==list):
+		regions = len(focus)
+	else:
+		regions = 1
+
+	if (regions > 5):
+		print('Limit of 5 regions')
+		return
+
+	exposure = exposure/1000.
+	images = slices*colors*timepoint
+
+
+	analog_output = pydaq.Task()
+	analog_output.CreateAOVoltageChan(focusChannel, "", -5.0,5.0, pydaq.DAQmx_Val_Volts, None)
+	analog_output.CreateAOVoltageChan(scanChannel, "", -5.0,5.0, pydaq.DAQmx_Val_Volts, None)
+
+	samples = 10000
+	sampllingRate = float(samples)/exposure
+	analog_output.CfgSampClkTiming(None, samplingRate, pydaq.DAQmx_Val_Rising, pydaq.DAQmx_Val_FiniteSamps, samples)
+
+	scan = np.linspace(-0.250, 0.250, samples) + offset
+	focus = focus*np.ones((samples, regions))
+	focus = np.transpose(focus)
+
+	temp = (pydaq.c_byte*4)()
+	actualWritten = pydaq.cast(temp, pydaq.POINTER(pydaq.c_long))
+
+	analog_output.CfgDigEdgeStartTrig("PFI0", pydaq.DAQmx_Val_Rising)
+
+	region = 0
+	timepoint = 0
+
+	"""There is surely a way to do this that is neutral with regards to the number of regions, but for now I'll write this explicitely and limit the number of regions to 5
+	"""
+	for timepoint in np.arange(0,timepoints):
+		if (region==0):
+			writeData = np.vstack((focus[0,:], scan))
+			analog_output.WriteAnalogF64(samples, False, -1, pydaq.DAQmx_Val_GroupByChannel, writeData, actualWritten, none)
+			for image in np.arange(0,slices*colors):
+				analog_output.StartTask()
+				analof_output.WaitUntilTaskIsDone(10.)
+				analog_output.StopTask()
+			region = np.mod(region+1, regions)
+
+		elif (np.mod(image, 5) ==1):
+			writeData = np.vstack((focus[1,:], scan))
+			analog_output.WriteAnalogF64(samples, False, -1, pydaq.DAQmx_Val_GroupByChannel, writeData, actualWritten, none)
+			for image in np.arange(0,slices*colors):
+				analog_output.StartTask()
+				analof_output.WaitUntilTaskIsDone(10.)
+				analog_output.StopTask()
+			region = np.mod(region+1, regions)
+			
+		elif (np.mod(image, 5) ==2):
+			writeData = np.vstack((focus[2,:], scan))
+			analog_output.WriteAnalogF64(samples, False, -1, pydaq.DAQmx_Val_GroupByChannel, writeData, actualWritten, none)
+			for image in np.arange(0,slices*colors):
+				analog_output.StartTask()
+				analof_output.WaitUntilTaskIsDone(10.)
+				analog_output.StopTask()
+			region = np.mod(region+1, regions)
+
+		elif (np.mod(image, 5) ==3):
+			writeData = np.vstack((focus[3,:], scan))
+			analog_output.WriteAnalogF64(samples, False, -1, pydaq.DAQmx_Val_GroupByChannel, writeData, actualWritten, none)
+			for image in np.arange(0,slices*colors):
+				analog_output.StartTask()
+				analof_output.WaitUntilTaskIsDone(10.)
+				analog_output.StopTask()
+			region = np.mod(region+1, regions)
+
+		elif (np.mod(image, 5) ==4):
+			writeData = np.vstack((focus[4,:], scan))
+			analog_output.WriteAnalogF64(samples, False, -1, pydaq.DAQmx_Val_GroupByChannel, writeData, actualWritten, none)
+			for image in np.arange(0,slices*colors):
+				analog_output.StartTask()
+				analof_output.WaitUntilTaskIsDone(10.)
+				analog_output.StopTask()
+			region = np.mod(region+1, regions)
+
+	return
+
 def Scan(focus, offset, images, exposure, readout=10., focusChannel="Dev1/ao0", scanChannel="Dev1/ao1"):
 	"""Function to scan galvo mirror across field of view, centered on offset voltage and with the focus set by the perpendicular galvo. This function is specific to a National Instruments DAQ card, used to send signals to the mirror galvonometers. A trigger (e.g. from the camera) is currently necessary on PFI0, if undesirable, change CfgDigEdgeStartTrig.
 	
@@ -274,6 +367,7 @@ def NoScanFocus(focus, offset, focusChannel="Dev1/ao0", scanChannel="Dev1/ao1"):
 				analog_output.WriteAnalogF64(samples, False, -1, pydaq.DAQmx_Val_GroupByChannel, writeData, actualWritten, None)
 				analog_output.StartTask()
 
+			except:
 				Exit = raw_input("Want to exit?")
 				if (Exit == 'y'):
 					analog_output.StopTask()

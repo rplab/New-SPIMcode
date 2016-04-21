@@ -42,7 +42,7 @@ def Scan(focus, offset, images, exposure, readout=10., focusChannel="Dev1/ao0", 
 	    focusChannel - string, Hardware device and channel that controls the focus galvo, e.g. "Dev1/ao0"
 	    scanChannel - string, Hardware device and channel that controls the scan galvo, e.g. "Dev1/ao1"
 	"""
-	print('Make sure that camera trigger is positive and set to Exposure')
+	print('Make sure that camera trigger is positive and set to Exposure\n otherwise behavior is unpredictable.')
 
 	focus = float(focus)
 	offset = float(offset)
@@ -60,7 +60,7 @@ def Scan(focus, offset, images, exposure, readout=10., focusChannel="Dev1/ao0", 
 	HLN = 2592
 	H1 = HLN/266000000.
 	readout = 2048*H1
-	print(readout)
+	#print(readout)
 	timer = pydaq.Task()
 	timer.CreateCOPulseChanTime("Dev1/Ctr0", "timer", pydaq.DAQmx_Val_Seconds, pydaq.DAQmx_Val_Low, 0.01, readout, exposure)
 	timer.CfgImplicitTiming(pydaq.DAQmx_Val_FiniteSamps, images)
@@ -274,6 +274,7 @@ def NoScanFocus(focus, offset, focusChannel="Dev1/ao0", scanChannel="Dev1/ao1"):
 				analog_output.WriteAnalogF64(samples, False, -1, pydaq.DAQmx_Val_GroupByChannel, writeData, actualWritten, None)
 				analog_output.StartTask()
 
+			except:
 				Exit = raw_input("Want to exit?")
 				if (Exit == 'y'):
 					analog_output.StopTask()
