@@ -143,8 +143,8 @@ def Scan(focus, offset, images, exposure, readout=10., focusChannel="Dev1/ao0", 
 	readout = readout/1000.
 
 	analog_output = pydaq.Task()
-	analog_output.CreateAOVoltageChan(focusChannel, "", -5.0, 5.0, pydaq.DAQmx_Val_Volts, None)
-	analog_output.CreateAOVoltageChan(scanChannel, "", -5.0, 5.0, pydaq.DAQmx_Val_Volts, None)
+	analog_output.CreateAOVoltageChan(focusChannel, "", -10.0, 10.0, pydaq.DAQmx_Val_Volts, None)
+	analog_output.CreateAOVoltageChan(scanChannel, "", -10.0, 10.0, pydaq.DAQmx_Val_Volts, None)
 
 	"""Create a timer that can be used to trigger the camera in light sheet readout mode (Hamamatus Orca Flash).
 	There is a delay in the camera (see manual) of 1H*9, where 1H = HLN/(26600000) (HLN 2592 to 266*10^6 - refer to section 10-3-2 of the manual).
@@ -217,7 +217,7 @@ def Scan(focus, offset, images, exposure, readout=10., focusChannel="Dev1/ao0", 
 
 
 
-def ContinuousScan(focus, offset, duration=10., focusChannel="Dev1/ao0", scanChannel="Dev1/ao1"):
+def ContinuousScan(focus, offset, duration=10. , extent=0.500 , focusChannel="Dev1/ao0", scanChannel="Dev1/ao1"):
 	"""Function to continuously scan galvo mirror across field of view, centered on offset voltage and with the focus set by the perpendicular galvo. This function is specific to a National Instruments DAQ card, used to send signals to the mirror galvonometers. This function is useful when the camera is in free-runnung mode for, e.g. sample location, focus adjustment, etc.
 
 	The main differences between this function and galvoScan are that 1. writing to the DAQ card occurs continuously in a loop and 2. writing starts immediately (there is no waiting for an external trigger).
@@ -236,18 +236,18 @@ def ContinuousScan(focus, offset, duration=10., focusChannel="Dev1/ao0", scanCha
 	"""
 	duration = duration/1000.
 	analog_output = pydaq.Task()
-	analog_output.CreateAOVoltageChan(focusChannel, "", -5.0, 5.0, pydaq.DAQmx_Val_Volts, None)
-	analog_output.CreateAOVoltageChan(scanChannel, "", -5.0, 5.0, pydaq.DAQmx_Val_Volts, None)
+	analog_output.CreateAOVoltageChan(focusChannel, "", -10.0, 10.0, pydaq.DAQmx_Val_Volts, None)
+	analog_output.CreateAOVoltageChan(scanChannel, "", -10.0, 10.0, pydaq.DAQmx_Val_Volts, None)
 	
 	"""For the time being, I am assuming that the field of view is (over)filled by sweeping through 600 milliVolts.
 	At 40x with the Hamamatsu sCMOS, this should be about 333 microns, so there is a rough correspondence of 1.8mV to 
 	1um. Since the NIR (bessel) beam has a FWHM of about 3um, I will move in 1mV (0.55um) steps, which should appear
 	continuos. This means that the sampling rate should be set to samples/duration (where samples is 600)."""
-	samples = 10000*2
+	samples = 10000
 	samplingRate = float(samples)/duration
 	analog_output.CfgSampClkTiming(None, samplingRate, pydaq.DAQmx_Val_Rising, pydaq.DAQmx_Val_ContSamps, samples)
 
-	scan = np.linspace(-0.250, 0.250, samples/2.) + offset
+	scan = np.linspace(-1*extent/2, extent/2, samples/2.) + offset
 	"""Trace backward for less acceleration on the galvo (pyramid instead of sawtooth):
 	"""
 	scan = np.concatenate((scan,scan[::-1]),0)
@@ -274,16 +274,16 @@ def ContinuousScan(focus, offset, duration=10., focusChannel="Dev1/ao0", scanCha
 				analog_output.StopTask()
 				if (k_in == 1):
 					focus = focus + 0.001
-					print('offset = %5.3f, focus = %5.3f' % (scan[0], focus[0]))
+					print('offset = %5.3f, focus = %5.3f' % (np.mean(scan), focus[0]))
 				elif (k_in == 3):
 					focus = focus - 0.001
-					print('offset = %5.3f, focus = %5.3f' % (scan[0], focus[0]))
+					print('offset = %5.3f, focus = %5.3f' % (np.mean(scan), focus[0]))
 				elif (k_in == 0):
 					scan = scan + 0.001
-					print('offset = %5.3f, focus = %5.3f' % (scan[len(scan)/2.], focus[0]))
+					print('offset = %5.3f, focus = %5.3f' % (np.mean(scan), focus[0]))
 				elif (k_in == 2):
 					scan = scan - 0.001
-					print('offset = %5.3f, focus = %5.3f' % (scan[len(scan)/2.], focus[0]))
+					print('offset = %5.3f, focus = %5.3f' % (np.mean(scan), focus[0]))
 				else:
 					derp = "derr"
 				writeData = np.concatenate((focus, scan),1)
@@ -319,8 +319,8 @@ def NoScanFocus(focus, offset, focusChannel="Dev1/ao0", scanChannel="Dev1/ao1"):
 	    scanChannel - string, Hardware device and channel that controls the scan galvo, e.g. "Dev1/ao1"
 	"""
 	analog_output = pydaq.Task()
-	analog_output.CreateAOVoltageChan(focusChannel, "", -5.0, 5.0, pydaq.DAQmx_Val_Volts, None)
-	analog_output.CreateAOVoltageChan(scanChannel, "", -5.0, 5.0, pydaq.DAQmx_Val_Volts, None)
+	analog_output.CreateAOVoltageChan(focusChannel, "", -10.0, 10.0, pydaq.DAQmx_Val_Volts, None)
+	analog_output.CreateAOVoltageChan(scanChannel, "", -10.0, 10.0, pydaq.DAQmx_Val_Volts, None)
 	
 	samples = 1000
 	samplingRate = 1000.

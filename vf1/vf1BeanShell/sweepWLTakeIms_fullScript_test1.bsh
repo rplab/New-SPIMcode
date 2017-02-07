@@ -21,7 +21,7 @@ nFrames = 7;
 nChannels = 1;
 nSlices = 1;
 exposure = 30;
-port = "COM4";
+port = "COM12";
 
 //more initialize
 gui.openAcquisition(acqName, savedir, nFrames, nChannels, nSlices);

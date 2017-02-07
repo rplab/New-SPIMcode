@@ -3,7 +3,7 @@
 import mmcorej.CharVector;
 gui.clearMessageWindow();
 
-port = "COM4";
+port = "COM12";
 CharVector message = new CharVector();
 char cmd = '\u00da';  //00da = 218 = setWL
 char wl1 = '\u00f4';  // 1f4 = 500.  Need to 
