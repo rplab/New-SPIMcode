@@ -20,7 +20,7 @@
              seems red herring, on axis error. niMax was working with niDAQ on ch: ao.2 and ao.3 not ao.0 and ao.1 as listed on acutall hardware bnc plugs.
 			 Will now test changing the ch's to see if galvos work on updated a0.2, a0.3.  mhd.
 
-22 July 2019 Changes
+22 July 2019 version 0_3_0 changes:
 - Added function no_scan_writeup_location
 - Fixed beam width buttons changing offset
 - [z] now cycles through stepsizes
@@ -161,6 +161,17 @@ def ContinuousScan2(setOffset, setFocus, stepSize, duration=10. , setWidth=0. , 
 					focus = focus - focus
 					scan = scan - scan
 					writeup_location(setOffset, focus[0], stepSize, setWidth)
+				elif (k_in == 'p'):
+					storedOffset = setOffset
+					storedFocus = setFocus
+					storedWidth = setWidth
+				elif (k_in == 'l'):
+					setOffset = storedOffset
+					setFocus = storedFocus
+					setWidth = storedWidth
+					scan = np.linspace(-1*setWidth/2, setWidth/2, samples/2.) + setOffset
+					scan = np.concatenate((scan,scan[::-1]),0)
+					writeup_location(setOffset, setFocus, stepSize, setWidth)
 
 				#>> End:  focus/offset Keys
 				#<< step size alpha keys Inputs
